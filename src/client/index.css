@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   Vercel Design System
+   Light: canvas-soft, ink. Dark: near-black, white.
+   ============================================ */
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;           /* #fafafa canvas-soft */
+    --foreground: 0 0% 9%;            /* #171717 ink */
+    --card: 0 0% 100%;                /* #ffffff canvas */
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;               /* ink CTA */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 98%;
+    --muted-foreground: 0 0% 53%;     /* #888888 mute */
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 100% 47%;        /* #ee0000 error */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 92%;               /* #ebebeb hairline */
+    --input: 0 0% 92%;
+    --ring: 0 0% 9%;
+    --radius: 0.5rem;
+
+    /* Vercel-specific tokens */
+    --body: 0 0% 30%;                 /* #4d4d4d */
+    --hairline-strong: 0 0% 63%;      /* #a1a1a1 */
+    --link: 211 100% 47%;             /* #0070f3 */
+
+    /* Stacked shadows */
+    --shadow-card: 0 0 0 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04), 0px 8px 8px -8px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 0 0 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04), 0px 8px 16px -4px rgba(0,0,0,0.04);
+    --shadow-input: 0 0 0 1px rgba(0,0,0,0.04);
+  }
+
+  .dark {
+    --background: 0 0% 4%;            /* #0a0a0a */
+    --foreground: 0 0% 98%;
+    --card: 0 0% 6%;                  /* #0f0f0f */
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;              /* white CTA on dark */
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 53%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 83%;
+    --body: 0 0% 63%;
+    --hairline-strong: 0 0% 40%;
+    --link: 211 100% 60%;
+
+    --shadow-card: 0 0 0 1px rgba(255,255,255,0.06), 0px 2px 2px rgba(0,0,0,0.2), 0px 8px 8px -8px rgba(0,0,0,0.3);
+    --shadow-card-hover: 0 0 0 1px rgba(255,255,255,0.08), 0px 2px 2px rgba(0,0,0,0.3), 0px 8px 16px -4px rgba(0,0,0,0.4);
+    --shadow-input: 0 0 0 1px rgba(255,255,255,0.04);
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Typography */
+.display-xl {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 48px; font-weight: 600; line-height: 48px; letter-spacing: -2.4px;
+}
+.display-lg {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 32px; font-weight: 600; line-height: 40px; letter-spacing: -1.28px;
+}
+.body-lg {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 18px; font-weight: 400; line-height: 28px;
+}
+.body-md {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px; font-weight: 400; line-height: 24px;
+}
+.caption-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 400; line-height: 16px;
+}
+.code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 400; line-height: 20px;
+}
+
+/* Mesh gradient — hero decoration */
+.mesh-gradient {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 40%, rgba(0,124,240,0.12), transparent),
+    radial-gradient(ellipse 60% 50% at 60% 30%, rgba(121,40,202,0.10), transparent),
+    radial-gradient(ellipse 50% 40% at 80% 50%, rgba(255,0,128,0.08), transparent),
+    radial-gradient(ellipse 60% 50% at 40% 60%, rgba(0,223,216,0.08), transparent),
+    radial-gradient(ellipse 50% 40% at 50% 35%, rgba(255,77,77,0.05), transparent),
+    radial-gradient(ellipse 40% 30% at 70% 55%, rgba(249,203,40,0.05), transparent);
+}
+
+/* Vercel 100px pill button */
+.btn-pill {
+  @apply inline-flex items-center justify-center bg-primary text-primary-foreground;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px; font-weight: 500; line-height: 24px;
+  padding: 0 24px; height: 48px; border-radius: 100px;
+  border: none; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-pill:hover { opacity: 0.9; }
+.btn-pill:disabled { opacity: 0.4; cursor: default; }
+
+.btn-pill-sm {
+  font-size: 14px; line-height: 20px;
+  padding: 0 12px; height: 32px; border-radius: 100px;
+}
+
+/* KaTeX */
+.katex-display { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+.katex-display > .katex { max-width: 100%; white-space: normal; word-break: break-all; font-size: 1.05em; }
+.katex { font-size: 1em; text-rendering: auto; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.3); border-radius: 4px; }

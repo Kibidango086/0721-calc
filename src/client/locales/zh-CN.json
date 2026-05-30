@@ -1,0 +1,27 @@
+{
+  "hero": {
+    "eyebrow": "数学论证",
+    "title": "0721 数字论证器.",
+    "lead": "输入任意数字，用 0 7 2 1 四个数字通过数学运算证明它。",
+    "placeholder": "42",
+    "copy": "复制",
+    "copied": "已复制",
+    "error": "请输入有效的数字。"
+  },
+  "result": {
+    "eyebrow": "结果",
+    "copyLatex": "复制 LaTeX",
+    "viewSource": "查看源码",
+    "hideSource": "隐藏源码"
+  },
+  "examples": {
+    "eyebrow": "示例",
+    "title": "试试这些数字。",
+    "lead": "点击卡片查看证明。"
+  },
+  "footer": {
+    "madeBy": "Made by Kibidango086",
+    "inspiration": "灵感窃自此知乎问题。",
+    "copyright": "© 2024-now 0721数字论证器"
+  }
+}
