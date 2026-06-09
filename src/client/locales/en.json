@@ -1,27 +1,11 @@
 {
-  "hero": {
-    "eyebrow": "Math Calculator",
-    "title": "0721 Number Calculator.",
-    "lead": "Enter any number. We prove it equals 0 7 2 1 — using nothing but math.",
-    "placeholder": "42",
-    "copy": "Copy",
-    "copied": "Copied",
-    "error": "Please enter a valid number."
-  },
-  "result": {
-    "eyebrow": "Result",
-    "copyLatex": "Copy LaTeX",
-    "viewSource": "View source",
-    "hideSource": "Hide source"
-  },
-  "examples": {
-    "eyebrow": "Examples",
-    "title": "Try these numbers.",
-    "lead": "Click any card to see its proof."
-  },
-  "footer": {
-    "madeBy": "Made by Kibidango086",
-    "inspiration": "Inspiration stolen from this Zhihu Question.",
-    "copyright": "© 2024-now 0721 Calculator"
-  }
+  "title": "Number Calculator",
+  "subtitle": "Enter any number. We prove it equals 0 7 2 1 — using nothing but math.",
+  "placeholder": "42",
+  "invalid": "Please enter a valid number",
+  "copy": "Copy LaTeX",
+  "copied": "Copied ✓",
+  "viewSrc": "View source",
+  "hideSrc": "Hide source",
+  "copyright": "© 2026 0721 Number Calculator"
 }

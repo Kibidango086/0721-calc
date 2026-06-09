@@ -1,149 +1,203 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, createContext, useContext } from "react";
 import katex from "katex";
 import { calculate } from "@/lib/calc";
-import { useI18n, I18nProvider } from "@/hooks/useI18n";
-import { ThemeProvider } from "@/hooks/useTheme";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LanguageSwitch } from "@/components/LanguageSwitch";
-import { Input } from "@/components/ui/input";
+import en from "@/locales/en.json";
+import zhCN from "@/locales/zh-CN.json";
+import ja from "@/locales/ja.json";
 
-function renderLatex(latex: string): string {
-  try {
-    return katex.renderToString(latex, { throwOnError: false, displayMode: true, trust: true });
-  } catch {
-    return `<span style="color:#ee0000">${latex}</span>`;
-  }
+// ─── i18n ────────────────────────────────────────────────────
+type Lang = "en" | "zh-CN" | "ja";
+type T = typeof en;
+const locales: Record<Lang, T> = { en, "zh-CN": zhCN, ja };
+
+const I18nCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: T }>({
+  lang: "zh-CN", setLang: () => {}, t: zhCN,
+});
+
+function I18nProvider({ children }: { children: React.ReactNode }) {
+  const [lang, setLang] = useState<Lang>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("lang") as Lang) || "zh-CN";
+    }
+    return "zh-CN";
+  });
+  const persist = useCallback((l: Lang) => { setLang(l); localStorage.setItem("lang", l); }, []);
+  return <I18nCtx.Provider value={{ lang, setLang: persist, t: locales[lang] }}>{children}</I18nCtx.Provider>;
 }
 
-function AppContent() {
-  const { t } = useI18n();
+function useT() { return useContext(I18nCtx); }
+
+// ─── Helpers ─────────────────────────────────────────────────
+function stripOuterParens(expr: string): string {
+  if (!expr.startsWith("(") || !expr.endsWith(")")) return expr;
+  let d = 0;
+  for (let i = 0; i < expr.length - 1; i++) {
+    if (expr[i] === "(") d++;
+    if (expr[i] === ")") d--;
+    if (d === 0) return expr; // closed early — not wrapped
+  }
+  return expr.slice(1, -1);
+}
+
+function renderKatex(latex: string): string {
+  try { return katex.renderToString(latex, { throwOnError: false, displayMode: true, trust: true }); }
+  catch { return `<span style="color:var(--destructive)">${latex}</span>`; }
+}
+
+const LANGS: Lang[] = ["zh-CN", "en", "ja"];
+const LANG_LABELS: Record<Lang, string> = { en: "EN", "zh-CN": "中", ja: "日" };
+
+// ─── App Inner (inside provider) ──────────────────────────────
+function AppInner() {
   const [input, setInput] = useState("42");
   const [copied, setCopied] = useState(false);
-  const [showSource, setShowSource] = useState(false);
+  const [showSrc, setShowSrc] = useState(false);
+  const { t, lang, setLang } = useT();
+
+  // Init theme
+  useEffect(() => {
+    const stored = localStorage.getItem("theme");
+    const dark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.classList.toggle("dark", dark);
+  }, []);
+
+  const toggleTheme = useCallback((e: React.MouseEvent) => {
+    const html = document.documentElement;
+    const dark = !html.classList.contains("dark");
+    const apply = () => {
+      html.classList.toggle("dark", dark);
+      localStorage.setItem("theme", dark ? "dark" : "light");
+    };
+    const x = e.clientX, y = e.clientY;
+    html.style.setProperty("--vt-origin-x", x + "px");
+    html.style.setProperty("--vt-origin-y", y + "px");
+    if (document.startViewTransition) {
+      document.startViewTransition(() => apply());
+    } else {
+      apply();
+    }
+  }, []);
+
+  const cycleLang = useCallback(() => {
+    const idx = LANGS.indexOf(lang);
+    setLang(LANGS[(idx + 1) % LANGS.length]);
+  }, [lang, setLang]);
 
   const result = useMemo(() => {
-    const trimmed = input.trim();
-    if (!trimmed) return null;
-    const num = parseFloat(trimmed);
-    if (isNaN(num)) return { error: t.hero.error };
-    try {
-      return { input: num, expression: calculate(num) };
-    } catch {
-      return { error: t.hero.error };
-    }
-  }, [input, t]);
+    const s = input.trim();
+    if (!s) return null;
+    const n = parseFloat(s);
+    if (isNaN(n)) return { error: true };
+    try { return { input: n, expr: stripOuterParens(calculate(n)) }; }
+    catch { return { error: true }; }
+  }, [input]);
 
-  const handleCopy = useCallback(() => {
-    if (result && "expression" in result) {
-      navigator.clipboard.writeText(result.expression);
+  const doCopy = useCallback(() => {
+    if (result && "expr" in result) {
+      navigator.clipboard.writeText(result.expr);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   }, [result]);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* HERO */}
-      <section className="bg-card pt-24 pb-20 sm:pt-32 sm:pb-24">
-        <div className="max-w-2xl mx-auto px-6 text-center">
-          <p className="caption-mono uppercase text-muted-foreground mb-4">{t.hero.eyebrow}</p>
-          <h1 className="display-xl text-foreground mb-4">{t.hero.title}</h1>
-          <p className="body-lg text-muted-foreground max-w-lg mx-auto mb-8">
-            {t.hero.lead}
-          </p>
+    <>
+    <div style={{ flex: 1 }}>
+      {/* Nav */}
+      <nav className="top-nav">
+        <a href="/" className="nav-brand">0721 数字论证器</a>
+        <div className="nav-right">
+          <button className="lang-switch" onClick={cycleLang} aria-label="Switch language">
+            {LANG_LABELS[lang]}
+          </button>
+          <button className="theme-switch" onClick={toggleTheme} aria-label="Toggle theme">
+            <span className="material-symbols-rounded icon-light">dark_mode</span>
+            <span className="material-symbols-rounded icon-dark">light_mode</span>
+          </button>
+        </div>
+      </nav>
 
-          <div className="max-w-md mx-auto">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground code text-sm">$</span>
-              <Input
-                type="text"
-                inputMode="decimal"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={t.hero.placeholder}
-                autoFocus
-                className="h-12 pl-8 code bg-card border-border text-base"
-                style={{ boxShadow: "var(--shadow-input)" }}
-              />
-            </div>
+      {/* Hero */}
+      <section className="hero-center">
+        <div className="hero-center-inner">
+          <h1 className="hero-center-headline">
+            0721{" "}
+            <span style={{ color: "var(--primary)" }}>{t.title}</span>
+          </h1>
+          <p className="hero-center-sub">{t.subtitle}</p>
+
+          <div className="card" style={{ maxWidth: "560px", margin: "0 auto" }}>
+            <input
+              type="text" inputMode="decimal" className="calc-input"
+              value={input} onChange={(e) => setInput(e.target.value)}
+              placeholder={t.placeholder} autoFocus
+            />
           </div>
 
           {result && "error" in result && (
-            <p className="code text-sm text-destructive mt-3">{result.error}</p>
+            <p style={{ color: "var(--destructive)", fontSize: ".82rem", marginTop: "12px" }}>{t.invalid}</p>
           )}
         </div>
       </section>
 
-      {/* RESULT — dark polarity-flip band */}
-      {result && "expression" in result && (
-        <section className="bg-primary text-primary-foreground py-20 sm:py-24">
-          <div className="max-w-2xl mx-auto px-6">
-            <p className="caption-mono uppercase text-muted-foreground mb-3">{t.result.eyebrow}</p>
-            <p className="code text-sm text-muted-foreground mb-6">{result.input} =</p>
-
-            <div className="bg-primary-foreground/5 rounded-lg p-6 overflow-x-auto mb-6">
-              <div className="text-primary-foreground" dangerouslySetInnerHTML={{ __html: renderLatex(result.expression) }} />
+      {/* Result */}
+      {result && "expr" in result && (
+        <section style={{ position: "relative", zIndex: 10, maxWidth: "800px", margin: "0 auto 32px", padding: "0 16px" }}>
+          <div className="result-card">
+            <div style={{ fontSize: ".78rem", color: "var(--muted-fg)", fontFamily: "var(--font-mono)", marginBottom: "8px" }}>
+              {result.input} =
             </div>
 
-            <div className="flex gap-3 flex-wrap">
-              <button
-                className="btn-pill-sm inline-flex items-center justify-center bg-primary-foreground text-primary rounded-full"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: "14px", fontWeight: 500, border: "none", cursor: copied ? "default" : "pointer", opacity: copied ? 0.6 : 1 }}
-                onClick={handleCopy}
-                disabled={copied}
-              >
-                {copied ? t.hero.copied : t.result.copyLatex}
+            <div
+              style={{ overflowX: "auto", marginBottom: "20px", padding: "16px 0" }}
+              dangerouslySetInnerHTML={{ __html: renderKatex(result.expr) }}
+            />
+
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              <button className="btn-primary btn-sm" onClick={doCopy} disabled={copied}>
+                {copied ? t.copied : t.copy}
               </button>
-              <button
-                className="btn-pill-sm inline-flex items-center justify-center border border-primary-foreground/20 text-primary-foreground rounded-full"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: "14px", fontWeight: 500, background: "transparent", cursor: "pointer" }}
-                onClick={() => setShowSource(!showSource)}
-              >
-                {showSource ? t.result.hideSource : t.result.viewSource}
+              <button className="btn-outline btn-sm" onClick={() => setShowSrc(!showSrc)}>
+                {showSrc ? t.hideSrc : t.viewSrc}
               </button>
             </div>
 
-            {showSource && (
-              <pre className="mt-4 p-4 bg-primary-foreground/10 rounded-lg code text-sm text-primary-foreground/70 whitespace-pre-wrap break-all overflow-x-auto">
-                {result.expression}
+            {showSrc && (
+              <pre style={{
+                marginTop: "16px", padding: "16px", borderRadius: "10px",
+                background: "var(--muted)", color: "var(--muted-fg)",
+                fontFamily: "var(--font-mono)", fontSize: ".78rem",
+                whiteSpace: "pre-wrap", wordBreak: "break-all", overflowX: "auto",
+              }}>
+                {result.expr}
               </pre>
             )}
           </div>
         </section>
       )}
 
-      {/* FOOTER */}
-      <footer className="border-t border-border bg-card py-16">
-        <div className="max-w-4xl mx-auto px-6 flex flex-wrap justify-between gap-6 text-sm text-muted-foreground">
-          <span className="caption-mono">
-            Made by{" "}
-            <a href="https://kibidango.top" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--link))", textDecoration: "underline", textUnderlineOffset: "2px" }}>
-              Kibidango086
-            </a>
-          </span>
-          <span className="caption-mono">
-            Inspiration from{" "}
-            <a href="https://www.zhihu.com/question/264059954" target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--link))", textDecoration: "underline", textUnderlineOffset: "2px" }}>
-              this Zhihu Question
-            </a>
-          </span>
-          <span className="caption-mono text-muted-foreground">{t.footer.copyright}</span>
-        </div>
-      </footer>
     </div>
+
+      {/* Footer */}
+      <footer className="site-footer">
+        <p>
+          Made by{" "}
+          <a href="https://kibidango.top" target="_blank" rel="noopener noreferrer">Kibidango086</a>
+          {" · "}
+          Inspiration from{" "}
+          <a href="https://www.zhihu.com/question/264059954" target="_blank" rel="noopener noreferrer">this Zhihu Question</a>
+        </p>
+        <p style={{ marginTop: "4px" }}>{t.copyright}</p>
+      </footer>
+    </>
   );
 }
 
+// ─── App (provider wrapper) ──────────────────────────────────
 export default function App() {
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-          <LanguageSwitch />
-          <ThemeToggle />
-        </div>
-        <AppContent />
-      </I18nProvider>
-    </ThemeProvider>
+    <I18nProvider>
+      <AppInner />
+    </I18nProvider>
   );
 }

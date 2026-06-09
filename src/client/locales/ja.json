@@ -1,27 +1,11 @@
 {
-  "hero": {
-    "eyebrow": "数学論証",
-    "title": "0721 数字論証器.",
-    "lead": "任意の数字を入力すると、0 7 2 1 の4桁だけを使って数学的に証明します。",
-    "placeholder": "42",
-    "copy": "コピー",
-    "copied": "コピー済",
-    "error": "有効な数字を入力してください。"
-  },
-  "result": {
-    "eyebrow": "結果",
-    "copyLatex": "LaTeXをコピー",
-    "viewSource": "ソースを表示",
-    "hideSource": "ソースを隠す"
-  },
-  "examples": {
-    "eyebrow": "例",
-    "title": "これらの数字を試す。",
-    "lead": "カードをクリックして証明を見る。"
-  },
-  "footer": {
-    "madeBy": "Made by Kibidango086",
-    "inspiration": "この知乎質問から着想を得た。",
-    "copyright": "© 2024-now 0721数字論証器"
-  }
+  "title": "数字論証器",
+  "subtitle": "任意の数字を入力してください。0 7 2 1 の4桁だけで数学的に証明します。",
+  "placeholder": "42",
+  "invalid": "有効な数字を入力してください",
+  "copy": "LaTeXをコピー",
+  "copied": "コピー済 ✓",
+  "viewSrc": "ソースを表示",
+  "hideSrc": "ソースを隠す",
+  "copyright": "© 2026 0721数字論証器"
 }
